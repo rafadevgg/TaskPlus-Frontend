@@ -28,6 +28,8 @@ export class RegistroComponent {
   errorMessage = '';
 
   onSubmit(): void {
+    console.log('Tentando submeter:', this.registroData);
+
     if (!this.registroData.nome || !this.registroData.email || !this.registroData.senha) {
       this.errorMessage = 'Preencha todos os campos!';
       return;
@@ -47,12 +49,27 @@ export class RegistroComponent {
     this.errorMessage = '';
 
     this.authService.registro(this.registroData).subscribe({
-      next: () => {
+      next: (response) => {
+        console.log('Registro bem-sucedido:', response);
         this.loading = false;
       },
       error: (error) => {
+        console.error('Erro completo:', error);
+        console.error('Erro status:', error.status);
+        console.error('Erro mensagem:', error.error);
+        
         this.loading = false;
-        this.errorMessage = error.error?.message || 'Erro ao criar conta. Tente novamente!';
+        
+        // Tratamento de erros específicos
+        if (error.status === 0) {
+          this.errorMessage = 'Não foi possível conectar ao servidor. Verifique se o backend está rodando!';
+        } else if (error.status === 400) {
+          this.errorMessage = error.error?.message || 'Dados inválidos!';
+        } else if (error.status === 409) {
+          this.errorMessage = 'Email já cadastrado!';
+        } else {
+          this.errorMessage = error.error?.message || 'Erro ao criar conta. Tente novamente!';
+        }
       }
     });
   }

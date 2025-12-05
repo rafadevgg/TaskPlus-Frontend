@@ -15,27 +15,34 @@ export class AuthService {
   private apiUrl = 'http://localhost:8089/api/auth';
   
   currentUser = signal<AuthResponse | null>(null);
-  isAuthenticated = signal<boolean>(false);
+  private _isAuthenticated = signal<boolean>(false);
 
   constructor() {
     this.loadUserFromStorage();
   }
 
   private loadUserFromStorage(): void {
-    
     const token = localStorage.getItem('token');
     const user = localStorage.getItem('user');
     
     if (token && user) {
       this.currentUser.set(JSON.parse(user));
-      this.isAuthenticated.set(true);
+      this._isAuthenticated.set(true);
     }
-    
+  }
+
+  // Método público para verificar autenticação
+  isAuthenticated(): boolean {
+    return this._isAuthenticated();
   }
 
   registro(data: UsuarioRegistro): Observable<AuthResponse> {
+    console.log('Tentando registrar:', data);
     return this.http.post<AuthResponse>(`${this.apiUrl}/register`, data).pipe(
-      tap(response => this.handleAuthSuccess(response))
+      tap(response => {
+        console.log('Resposta do registro:', response);
+        this.handleAuthSuccess(response);
+      })
     );
   }
 
@@ -49,7 +56,7 @@ export class AuthService {
     localStorage.setItem('token', response.token);
     localStorage.setItem('user', JSON.stringify(response));
     this.currentUser.set(response);
-    this.isAuthenticated.set(true);
+    this._isAuthenticated.set(true);
     this.router.navigate(['/dashboard']);
   }
 
@@ -57,7 +64,7 @@ export class AuthService {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     this.currentUser.set(null);
-    this.isAuthenticated.set(false);
+    this._isAuthenticated.set(false);
     this.router.navigate(['/login']);
   }
 
