@@ -14,7 +14,7 @@ import { UsuarioRegistro } from '../../shared/models/Auth';
 })
 
 export class RegistroComponent {
-  
+
   private authService = inject(AuthService);
 
   registroData: UsuarioRegistro = {
@@ -57,10 +57,9 @@ export class RegistroComponent {
         console.error('Erro completo:', error);
         console.error('Erro status:', error.status);
         console.error('Erro mensagem:', error.error);
-        
+
         this.loading = false;
-        
-        // Tratamento de erros específicos
+
         if (error.status === 0) {
           this.errorMessage = 'Não foi possível conectar ao servidor. Verifique se o backend está rodando!';
         } else if (error.status === 400) {

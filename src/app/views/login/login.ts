@@ -14,7 +14,7 @@ import { UsuarioLogin } from '../../shared/models/Auth';
 })
 
 export class LoginComponent {
-  
+
   private authService = inject(AuthService);
   private router = inject(Router);
 

@@ -15,19 +15,19 @@ import { Tarefa, TarefaRequest, Categoria } from '../../shared/models/Tarefa';
 })
 
 export class DashboardComponent implements OnInit {
-  
+
   authService = inject(AuthService);
-  
+
   private tarefaService = inject(TarefaService);
   private categoriaService = inject(CategoriaService);
 
   tarefas = signal<Tarefa[]>([]);
   categorias = signal<Categoria[]>([]);
-  
+
   showModal = false;
   showCategoriaModal = false;
   editMode = false;
-  
+
   novaTarefa: TarefaRequest = {
     nmTarefa: '',
     dlTarefa: '',
@@ -63,7 +63,7 @@ export class DashboardComponent implements OnInit {
 
   get tarefasFiltradas(): Tarefa[] {
     const todas = this.tarefas();
-    
+
     switch (this.filtroAtivo) {
       case 'pendentes':
         return todas.filter(t => t.stTarefa === 'PENDENTE');
