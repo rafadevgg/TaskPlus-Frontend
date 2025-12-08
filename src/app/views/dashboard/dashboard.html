@@ -29,7 +29,7 @@
         <div class="sidebar-footer">
             <div class="user-profile">
                 <div class="user-avatar">
-                    {{ authService.currentUser()?.nome?.charAt(0).toUpperCase() }}
+                    {{ authService.currentUser()?.nome?.charAt(0)?.toUpperCase() }}
                 </div>
                 <div class="user-info">
                     <span class="user-name">{{ authService.currentUser()?.nome }}</span>

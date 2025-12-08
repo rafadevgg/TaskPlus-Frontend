@@ -16,6 +16,7 @@ import { UsuarioRegistro } from '../../shared/models/Auth';
 export class RegistroComponent {
 
   private authService = inject(AuthService);
+  private router = inject(Router);
 
   registroData: UsuarioRegistro = {
     nome: '',
@@ -27,21 +28,33 @@ export class RegistroComponent {
   loading = false;
   errorMessage = '';
 
+  ngOnInit(): void {
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/dashboard']);
+    }
+  }
+
   onSubmit(): void {
     console.log('Tentando submeter:', this.registroData);
 
     if (!this.registroData.nome || !this.registroData.email || !this.registroData.senha) {
-      this.errorMessage = 'Preencha todos os campos!';
+      this.errorMessage = 'Preencha todos os campos obrigatórios!';
       return;
     }
 
-    if (this.registroData.senha !== this.confirmarSenha) {
-      this.errorMessage = 'As senhas não coincidem!';
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.registroData.email)) {
+      this.errorMessage = 'Por favor, insira um e-mail válido!';
       return;
     }
 
     if (this.registroData.senha.length < 6) {
       this.errorMessage = 'A senha deve ter no mínimo 6 caracteres!';
+      return;
+    }
+
+    if (this.registroData.senha !== this.confirmarSenha) {
+      this.errorMessage = 'As senhas não coincidem!';
       return;
     }
 
@@ -65,7 +78,7 @@ export class RegistroComponent {
         } else if (error.status === 400) {
           this.errorMessage = error.error?.message || 'Dados inválidos!';
         } else if (error.status === 409) {
-          this.errorMessage = 'Email já cadastrado!';
+          this.errorMessage = 'Este e-mail já está cadastrado!';
         } else {
           this.errorMessage = error.error?.message || 'Erro ao criar conta. Tente novamente!';
         }
