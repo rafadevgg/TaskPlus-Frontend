@@ -1,0 +1,70 @@
+<div class="calendario-container">
+    <header class="page-header">
+        <button class="btn-back" (click)="voltar()">
+            <i class="bi bi-arrow-left"></i>
+        </button>
+        <div class="page-title">
+            <h1>Calendário</h1>
+            <p>Visualize suas tarefas organizadas por data</p>
+        </div>
+    </header>
+
+    <div class="calendario-card">
+        <div class="calendario-header">
+            <button class="btn-nav" (click)="mesAnterior()">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <h2>{{ mesAtualTexto() }}</h2>
+            <button class="btn-nav" (click)="proximoMes()">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+
+        <div class="calendario-grid">
+            <div class="dias-semana">
+                @for (dia of diasSemana; track dia) {
+                <div class="dia-semana">{{ dia }}</div>
+                }
+            </div>
+
+            <div class="dias-mes">
+                @for (diaObj of diasDoMes; track diaObj.data) {
+                <div class="dia-celula" [class.mes-atual]="diaObj.mesAtual" [class.hoje]="diaObj.hoje"
+                    [class.com-tarefas]="diaObj.tarefas.length > 0">
+                    <span class="numero-dia">{{ diaObj.dia }}</span>
+
+                    @if (diaObj.tarefas.length > 0) {
+                    <div class="tarefas-indicador">
+                        @for (tarefa of diaObj.tarefas.slice(0, 3); track tarefa.cdTarefa) {
+                        <div class="tarefa-mini" [class.concluida]="tarefa.stTarefa === 'CONCLUÍDA'"
+                            [title]="tarefa.nmTarefa">
+                            <span class="tarefa-ponto"></span>
+                            <span class="tarefa-nome">{{ tarefa.nmTarefa }}</span>
+                        </div>
+                        }
+                        @if (diaObj.tarefas.length > 3) {
+                        <span class="mais-tarefas">+{{ diaObj.tarefas.length - 3 }} mais</span>
+                        }
+                    </div>
+                    }
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="legenda">
+        <div class="legenda-item">
+            <span class="ponto ponto-pendente"></span>
+            <span>Pendente</span>
+        </div>
+        <div class="legenda-item">
+            <span class="ponto ponto-concluida"></span>
+            <span>Concluída</span>
+        </div>
+        <div class="legenda-item">
+            <span class="ponto ponto-hoje"></span>
+            <span>Hoje</span>
+        </div>
+    </div>
+</div>

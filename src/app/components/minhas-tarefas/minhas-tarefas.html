@@ -1,0 +1,136 @@
+<div class="page-container">
+    <header class="page-header">
+        <button class="btn-back" (click)="voltar()">
+            <i class="bi bi-arrow-left"></i>
+        </button>
+        <div class="page-title">
+            <h1>Minhas Tarefas</h1>
+            <p>Gerencie todas as suas tarefas</p>
+        </div>
+        <button class="btn-primary-modern" (click)="abrirModal()">
+            <i class="bi bi-plus-lg"></i>
+            <span>Nova Tarefa</span>
+        </button>
+    </header>
+
+    <div class="filter-section">
+        <div class="filter-tabs">
+            <button class="tab-btn" [class.active]="filtroAtivo === 'todas'" (click)="filtroAtivo = 'todas'">
+                <i class="bi bi-list-task"></i>
+                Todas
+            </button>
+            <button class="tab-btn" [class.active]="filtroAtivo === 'pendentes'" (click)="filtroAtivo = 'pendentes'">
+                <i class="bi bi-clock-history"></i>
+                Pendentes
+            </button>
+            <button class="tab-btn" [class.active]="filtroAtivo === 'concluidas'" (click)="filtroAtivo = 'concluidas'">
+                <i class="bi bi-check-circle-fill"></i>
+                Concluídas
+            </button>
+        </div>
+
+        <div class="results-count">
+            <span>{{ tarefasFiltradas.length }} tarefa(s) encontrada(s)</span>
+        </div>
+    </div>
+
+    @if (tarefasFiltradas.length === 0) {
+    <div class="empty-state">
+        <i class="bi bi-inbox"></i>
+        <h3>Nenhuma tarefa encontrada</h3>
+        <p>Comece criando sua primeira tarefa</p>
+        <button class="btn-primary-modern" (click)="abrirModal()">
+            <i class="bi bi-plus-lg"></i>
+            <span>Criar Tarefa</span>
+        </button>
+    </div>
+    } @else {
+    <div class="tasks-grid">
+        @for (tarefa of tarefasFiltradas; track tarefa.cdTarefa) {
+        <div class="task-card" [class.completed]="tarefa.stTarefa === 'CONCLUÍDA'">
+            <div class="task-header">
+                <h4>{{ tarefa.nmTarefa }}</h4>
+                @if (tarefa.categoria) {
+                <span class="task-badge">{{ tarefa.categoria.nmCategoria }}</span>
+                }
+            </div>
+
+            <div class="task-meta">
+                <span class="task-date">
+                    <i class="bi bi-calendar3"></i>
+                    {{ formatarData(tarefa.dlTarefa) }}
+                </span>
+                <span class="task-status" [class.status-pending]="tarefa.stTarefa === 'PENDENTE'"
+                    [class.status-completed]="tarefa.stTarefa === 'CONCLUÍDA'">
+                    {{ tarefa.stTarefa }}
+                </span>
+            </div>
+
+            <div class="task-actions">
+                @if (tarefa.stTarefa === 'PENDENTE') {
+                <button class="btn-task btn-success" (click)="concluirTarefa(tarefa.cdTarefa!)" title="Concluir">
+                    <i class="bi bi-check2"></i>
+                </button>
+                <button class="btn-task btn-warning" (click)="adiarTarefa(tarefa.cdTarefa!)" title="Adiar">
+                    <i class="bi bi-clock"></i>
+                </button>
+                <button class="btn-task btn-edit" (click)="abrirModalEdicao(tarefa)" title="Editar">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                }
+                <button class="btn-task btn-danger" (click)="deletarTarefa(tarefa.cdTarefa!)" title="Excluir">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        </div>
+        }
+    </div>
+    }
+</div>
+
+@if (showModal) {
+<div class="modal-overlay" (click)="fecharModal()">
+    <div class="modal-modern" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>{{ editMode ? 'Editar Tarefa' : 'Nova Tarefa' }}</h3>
+            <button class="btn-close-modal" (click)="fecharModal()">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <form>
+                <div class="form-group">
+                    <label>Nome da Tarefa *</label>
+                    <input type="text" [(ngModel)]="novaTarefa.nmTarefa" name="nmTarefa"
+                        placeholder="Digite o nome da tarefa">
+                </div>
+
+                <div class="form-group">
+                    <label>Data Limite *</label>
+                    <input type="datetime-local" [(ngModel)]="novaTarefa.dlTarefa" name="dlTarefa">
+                </div>
+
+                <div class="form-group">
+                    <label>Categoria</label>
+                    <select [(ngModel)]="novaTarefa.cdCategoria" name="categoria">
+                        <option [ngValue]="undefined">Sem categoria</option>
+                        @for (cat of categorias(); track cat.cdCategoria) {
+                        <option [ngValue]="cat.cdCategoria">{{ cat.nmCategoria }}</option>
+                        }
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-secondary-modern" (click)="fecharModal()">
+                Cancelar
+            </button>
+            <button class="btn-primary-modern" (click)="salvarTarefa()">
+                {{ editMode ? 'Atualizar' : 'Salvar' }}
+            </button>
+        </div>
+    </div>
+</div>
+}

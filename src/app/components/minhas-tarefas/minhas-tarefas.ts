@@ -7,23 +7,15 @@ import { TarefaService } from '../../services/tarefa-service';
 import { CategoriaService } from '../../services/categoria-service';
 import { Tarefa, TarefaRequest, Categoria } from '../../shared/models/Tarefa';
 
-interface Notificacao {
-  id: number;
-  mensagem: string;
-  tipo: 'info' | 'warning' | 'success';
-  tempo: string;
-  lida: boolean;
-}
-
 @Component({
-  selector: 'app-dashboard',
+  selector: 'app-minhas-tarefas',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
-  templateUrl: './dashboard.html',
-  styleUrl: './dashboard.scss'
+  templateUrl: './minhas-tarefas.html',
+  styleUrl: './minhas-tarefas.scss'
 })
 
-export class DashboardComponent implements OnInit {
+export class MinhasTarefas implements OnInit {
 
   authService = inject(AuthService);
   private router = inject(Router);
@@ -34,8 +26,6 @@ export class DashboardComponent implements OnInit {
   categorias = signal<Categoria[]>([]);
 
   showModal = false;
-  showCategoriaModal = false;
-  showNotifications = false;
   editMode = false;
 
   novaTarefa: TarefaRequest = {
@@ -46,26 +36,16 @@ export class DashboardComponent implements OnInit {
 
   tarefaEditando: Tarefa | null = null;
 
-  novaCategoria = {
-    nmCategoria: ''
-  };
-
   filtroAtivo: 'todas' | 'pendentes' | 'concluidas' = 'todas';
-
-  notificacoes: Notificacao[] = [];
 
   ngOnInit(): void {
     this.carregarTarefas();
     this.carregarCategorias();
-    this.gerarNotificacoes();
   }
 
   carregarTarefas(): void {
     this.tarefaService.listarTodas().subscribe({
-      next: (tarefas) => {
-        this.tarefas.set(tarefas);
-        this.gerarNotificacoes();
-      },
+      next: (tarefas) => this.tarefas.set(tarefas),
       error: (error) => console.error('Erro ao carregar tarefas:', error)
     });
   }
@@ -75,60 +55,6 @@ export class DashboardComponent implements OnInit {
       next: (categorias) => this.categorias.set(categorias),
       error: (error) => console.error('Erro ao carregar categorias:', error)
     });
-  }
-
-  gerarNotificacoes(): void {
-    this.notificacoes = [];
-    const agora = new Date();
-    const umDia = 24 * 60 * 60 * 1000;
-
-    this.tarefas().forEach((tarefa, index) => {
-      if (tarefa.stTarefa === 'PENDENTE') {
-        const dataLimite = new Date(tarefa.dlTarefa);
-        const diferenca = dataLimite.getTime() - agora.getTime();
-
-        if (diferenca < 0) {
-          this.notificacoes.push({
-            id: index + 1,
-            mensagem: `Tarefa "${tarefa.nmTarefa}" está atrasada!`,
-            tipo: 'warning',
-            tempo: 'Agora',
-            lida: false
-          });
-        } else if (diferenca < umDia) {
-          this.notificacoes.push({
-            id: index + 1,
-            mensagem: `Tarefa "${tarefa.nmTarefa}" vence hoje!`,
-            tipo: 'warning',
-            tempo: 'Hoje',
-            lida: false
-          });
-        } else if (diferenca < 2 * umDia) {
-          this.notificacoes.push({
-            id: index + 1,
-            mensagem: `Tarefa "${tarefa.nmTarefa}" vence amanhã!`,
-            tipo: 'info',
-            tempo: 'Amanhã',
-            lida: false
-          });
-        }
-      }
-    });
-
-    const concluidas = this.tarefas().filter(t => t.stTarefa === 'CONCLUÍDA');
-    if (concluidas.length > 0) {
-      this.notificacoes.push({
-        id: 9999,
-        mensagem: `Parabéns! Você completou ${concluidas.length} tarefa(s)!`,
-        tipo: 'success',
-        tempo: 'Hoje',
-        lida: false
-      });
-    }
-  }
-
-  toggleNotifications(): void {
-    this.showNotifications = !this.showNotifications;
   }
 
   get tarefasFiltradas(): Tarefa[] {
@@ -142,16 +68,6 @@ export class DashboardComponent implements OnInit {
       default:
         return todas;
     }
-  }
-
-  get estatisticas() {
-    const todas = this.tarefas();
-    return {
-      total: todas.length,
-      pendentes: todas.filter(t => t.stTarefa === 'PENDENTE').length,
-      concluidas: todas.filter(t => t.stTarefa === 'CONCLUÍDA').length,
-      adiadas: todas.filter(t => t.adiado === 'Sim').length
-    };
   }
 
   abrirModal(): void {
@@ -236,39 +152,6 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  abrirCategoriaModal(): void {
-    this.novaCategoria.nmCategoria = '';
-    this.showCategoriaModal = true;
-  }
-
-  fecharCategoriaModal(): void {
-    this.showCategoriaModal = false;
-  }
-
-  salvarCategoria(): void {
-    if (!this.novaCategoria.nmCategoria) {
-      alert('Digite o nome da categoria!');
-      return;
-    }
-
-    this.categoriaService.criar(this.novaCategoria).subscribe({
-      next: () => {
-        this.carregarCategorias();
-        this.novaCategoria.nmCategoria = '';
-      },
-      error: (error) => alert('Erro ao criar categoria')
-    });
-  }
-
-  deletarCategoria(id: number): void {
-    if (confirm('Deseja realmente excluir esta categoria?')) {
-      this.categoriaService.deletar(id).subscribe({
-        next: () => this.carregarCategorias(),
-        error: (error) => alert('Erro ao deletar categoria')
-      });
-    }
-  }
-
   formatarData(data: string): string {
     return new Date(data).toLocaleDateString('pt-BR', {
       day: '2-digit',
@@ -281,6 +164,10 @@ export class DashboardComponent implements OnInit {
 
   logout(): void {
     this.authService.logout();
+  }
+
+  voltar(): void {
+    this.router.navigate(['/dashboard']);
   }
 
 }

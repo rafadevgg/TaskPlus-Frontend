@@ -22,6 +22,16 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'minhas-tarefas',
+    loadComponent: () => import('./components/minhas-tarefas/minhas-tarefas').then(m => m.MinhasTarefas),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'calendario',
+    loadComponent: () => import('./components/calendario/calendario').then(m => m.Calendario),
+    canActivate: [authGuard]
+  },
+  {
     path: '**',
     redirectTo: 'login'
   }
