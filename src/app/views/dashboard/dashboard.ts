@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth-service';
 import { TarefaService } from '../../services/tarefa-service';
 import { CategoriaService } from '../../services/categoria-service';
@@ -9,7 +10,7 @@ import { Tarefa, TarefaRequest, Categoria } from '../../shared/models/Tarefa';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
@@ -17,7 +18,7 @@ import { Tarefa, TarefaRequest, Categoria } from '../../shared/models/Tarefa';
 export class DashboardComponent implements OnInit {
 
   authService = inject(AuthService);
-
+  private router = inject(Router);
   private tarefaService = inject(TarefaService);
   private categoriaService = inject(CategoriaService);
 
@@ -26,6 +27,7 @@ export class DashboardComponent implements OnInit {
 
   showModal = false;
   showCategoriaModal = false;
+  showNotifications = false;
   editMode = false;
 
   novaTarefa: TarefaRequest = {
@@ -41,6 +43,7 @@ export class DashboardComponent implements OnInit {
   };
 
   filtroAtivo: 'todas' | 'pendentes' | 'concluidas' = 'todas';
+  viewAtiva: 'dashboard' | 'tarefas' | 'categorias' | 'calendario' = 'dashboard';
 
   ngOnInit(): void {
     this.carregarTarefas();
@@ -59,6 +62,14 @@ export class DashboardComponent implements OnInit {
       next: (categorias) => this.categorias.set(categorias),
       error: (error) => console.error('Erro ao carregar categorias:', error)
     });
+  }
+
+  navegarPara(view: 'dashboard' | 'tarefas' | 'categorias' | 'calendario'): void {
+    this.viewAtiva = view;
+  }
+
+  toggleNotifications(): void {
+    this.showNotifications = !this.showNotifications;
   }
 
   get tarefasFiltradas(): Tarefa[] {
@@ -184,7 +195,7 @@ export class DashboardComponent implements OnInit {
     this.categoriaService.criar(this.novaCategoria).subscribe({
       next: () => {
         this.carregarCategorias();
-        this.fecharCategoriaModal();
+        this.novaCategoria.nmCategoria = '';
       },
       error: (error) => alert('Erro ao criar categoria')
     });
@@ -212,4 +223,5 @@ export class DashboardComponent implements OnInit {
   logout(): void {
     this.authService.logout();
   }
+
 }
